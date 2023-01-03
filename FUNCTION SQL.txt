@@ -1,0 +1,369 @@
+============================== FUNCTION ==================================
+SELECT SYSDATE();
+SELECT CONCAT('TAUFIQ','ABIDIN');
+SELECT MID ('TAUFIQ ABIDIN',8.3);
+
+============================== FUNCTION ==================================
+MEMBUAT FUNCTION :
+ - DELIMITER //
+
+CONTOH :
+ - DELIMITER //
+ - CREATE OR REPLACE FUNCTION luas_persegi(sisi INT)
+ - RETURN INT
+ - BEGIN
+ - RETURN sisi*sisi;
+ - END;
+ - //
+
+CARA MEMANGGILNYA :
+ - DELIMITER;
+ - SELECT LUAS_PERSEGI(9);
+
+
+
+ - CREATE OR REPLACE FUNCTION keliling_persegi(sisi INT)
+ - RETURNS INT
+ - BEGIN
+ - DECLARE kel INT;
+ - SELECT 4*sisi INTO kel;
+ - RETURN kel;
+ - END;
+ - //
+ - SELECT KELILING_PERSEGI(7);
+ - //
+
+
+
+FUNCTION LUAS LIMAS SEGITIGA SAMA SISI :
+
+RUMUS LUAS LIMAS SEGITIGAS SAMA SISI : 4 * LUAS SEGITIGA
+LUAS SEGITIGA = 0.5*alas*tinggi
+
+
+FUNCTION :
+
+- DELIMITER //
+- CREATE OR REPLACE FUNCTION Luas_Limas_Segitiga_Sama_sisi (alas DOUBLE,)
+- RETURNS DOUBLE
+- BEGIN
+- RETURN 4*0.5*(alas*alas)-(4*4) 
+as;
+- END;
+- //
+- SELECT Luas_Limas_Segitiga_Sama_sisi(4, 5);
+- //
+
+
+FUNCTION MENGHITUNG LUAS PERMUKAAN PRISMA SEGITIGA SAMA KAKI :
+
+RUMUS :
+L = (2 x luas alas) + (luas selimut)
+
+L = (2 x ½ x a x t) + (keliling alas x t)
+
+FUNCTION :
+
+- DELIMITER //
+- CREATE OR REPLACE FUNCTION Luas_Permukaan_Prisma_Segitiga_Sama_Kaki (a DOUBLE, t DOUBLE, s1 DOUBLE, s2 DOUBLE, s3 DOUBLE, t2 DOUBLE)
+- RETURNS DOUBLE
+- BEGIN
+- RETURN (2*0.5*a*t) + ((s1+s2+s3)*t2)
+- END;
+- //
+- SELECT Luas_Permukaan_Prisma_Segitiga_Sama_Kaki(8, 4.47, 6, 6, 8, 10);
+- //
+
+
+
+
+
+============================== FUNCTION TRIGGER ==================================
+
+DELIMITER //
+CREATE OR REPLACE TRIGGER masuk_nik
+BEFORE INSERT ON daftar_nama
+FOR EACH ROW
+BEGIN
+DECLARE v_nik INT;
+SELECT COUNT(*)+1 INTO v_nik FROM daftar_nama;
+SET NEW.nik = v_nik;
+END;
+//
+
+DELIMITER ;
+INSERT INTO daftar_nama(nama, jk, alamat, tempat_lahir, tanggal_lahir)
+VALUES('Kholid', 'L', 'Banjaranyar Kab.Brebes', 'Brebes', '2003-05-06');
+
+
+============================== FUNCTION TRIGGER ==================================
+
+DELIMITER //
+CREATE OR REPLACE TRIGGER masuk_nik
+BEFORE INSERT ON daftar_nama
+FOR EACH ROW
+BEGIN
+DECLARE tahun INT;
+DECLARE bulan CHAR(2);
+DECLARE hari CHAR(2);
+DECLARE v_nik CHAR(8);
+SELECT YEAR(NEW.tanggal_lahir) INTO tahun;
+SELECT RIGHT(MONTH(NEW.tanggal_lahir)+100, 2) INTO bulan;
+SELECT RIGHT(DAY(NEW.tanggal_lahir)+100, 2) INTO hari;
+SELECT CONCAT(hari, bulan, tahun) INTO v_nik;
+SET NEW.nik = v_nik;
+END;
+//
+
+SELECT * FROM daftar_nama WHERE nama='kholid';
+
+============================== FUNCTION TRIGGER JIKA ADA TANGGAL LAHIR YANG SAMA ==================================
+
+DELIMITER //
+CREATE OR REPLACE TRIGGER masuk_nik
+BEFORE INSERT ON daftar_nama
+FOR EACH ROW
+BEGIN
+DECLARE tahun INT;
+DECLARE bulan CHAR(2);
+DECLARE hari CHAR(2);
+DECLARE urut CHAR(4);
+DECLARE v_nik CHAR(12);
+SELECT YEAR(NEW.tanggal_lahir) INTO tahun;
+SELECT RIGHT(MONTH(NEW.tanggal_lahir)+100, 2) INTO bulan;
+SELECT RIGHT(DAY(NEW.tanggal_lahir)+100, 2) INTO hari;
+SELECT RIGHT(COUNT(*)+10001, 4) INTO urut FROM daftar_nama
+WHERE tanggal_lahir= NEW.tanggal_lahir;
+SELECT CONCAT(hari, bulan, tahun) INTO v_nik;
+SET NEW.nik = v_nik;
+END;
+//
+
+DELIMITER ;
+INSERT INTO daftar_nama(nama, jk, alamat, tempat_lahir, tanggal_lahir)
+VALUES('Khilid', 'L', 'Banjaranyar Kab.Brebes', 'Brebes', '2003-05-06');
+
+SELECT * FROM daftar_nama WHERE tanggal_lahir='2003-05-06';
+
+
+============================== TRIGGER MENAMBAHKAN PRODUK MINIMARKET ==================================
+DELIMITER //
+CREATE OR REPLACE TRIGGER tambah_produk
+BEFORE INSERT ON produk
+FOR EACH ROW
+BEGIN
+DECLARE urut CHAR(2);
+DECLARE v_id_produk CHAR(10);
+SELECT COUNT(*)+1 INTO urut FROM produk;
+SELECT CONCAT(23564, urut) INTO v_id_produk;
+SET NEW.id_produk = v_id_produk;
+END;
+//
+
+TAMBAH :
+DELIMITER ;
+INSERT INTO produk(nama_produk, harga, jenis, stok)
+VALUES('sabun dettol', '5000', 'peralatan mandi', '100');
+
+DELIMITER ;
+INSERT INTO produk(nama_produk, harga, jenis, stok)
+VALUES('sabun lifebuoy', '5000', 'peralatan mandi', '100');
+
+DELIMITER ;
+INSERT INTO produk(nama_produk, harga, jenis, stok)
+VALUES('sampo clear', '10000', 'peralatan mandi', '100');
+
+DELIMITER ;
+INSERT INTO produk(nama_produk, harga, jenis, stok)
+VALUES('sabun nuvo', '5000', 'peralatan mandi', '100');
+
+SELECT * FROM produk WHERE nama_produk = 'pepsodent';
+
+
+
+
+============================== TUGAS ==================================
+
+MariaDB [(none)]> use minimarket;
+Database changed
+MariaDB [minimarket]> desc produk;
++-------------+-------------+------+-----+---------+-------+
+| Field       | Type        | Null | Key | Default | Extra |
++-------------+-------------+------+-----+---------+-------+
+| id_produk   | char(6)     | NO   | PRI | NULL    |       |
+| nama_produk | varchar(25) | NO   |     | NULL    |       |
+| harga       | int(11)     | NO   |     | NULL    |       |
+| jenis       | varchar(20) | NO   |     | NULL    |       |
+| stok        | int(11)     | NO   |     | NULL    |       |
++-------------+-------------+------+-----+---------+-------+
+5 rows in set (0.007 sec)
+MariaDB [minimarket]> DELIMITER //
+MariaDB [minimarket]> CREATE OR REPLACE TRIGGER tambah_produk
+    -> BEFORE INSERT ON produk
+    -> FOR EACH ROW
+    -> BEGIN
+    -> DECLARE v_id_produk INT;
+    -> SELECT COUNT(*)+1 INTO v_id_produk FROM produk;
+    -> SET NEW.id_produk = v_id_produk;
+    -> SELECT CONCAT (nama_produk, harga, jenis, stok) INTO v_produk;
+    -> END;
+    -> //
+Query OK, 0 rows affected (0.009 sec)
+
+MariaDB [minimarket]> DELIMITER ;
+MariaDB [minimarket]> INSERT INTO produk(nama_produk, harga, jenis, stok)
+    -> VALUES('sampo clear', '10000', 'peralatan mandi', '100');
+Query OK, 1 row affected (0.013 sec)
+
+MariaDB [minimarket]> SELECT * FROM produk;
++-----------+----------------+-------+-----------------+------+
+| id_produk | nama_produk    | harga | jenis           | stok |
++-----------+----------------+-------+-----------------+------+
+| 1         | pepsodent      |  5000 | peralatan mandi |  100 |
+| 2         | sabun lifebuoy |  5000 | peralatan mandi |  100 |
+| 3         | sampo clear    | 10000 | peralatan mandi |  100 |
++-----------+----------------+-------+-----------------+------+
+3 rows in set (0.001 sec)
+
+
+
+
+MariaDB [(none)]> use minimarket;
+Database changed
+MariaDB [minimarket]> DELIMITER //
+MariaDB [minimarket]> CREATE OR REPLACE TRIGGER tambah_produk
+    -> BEFORE INSERT ON produk
+    -> FOR EACH ROW
+    -> BEGIN
+    -> DECLARE urut CHAR(2);
+    -> DECLARE v_id_produk CHAR(10);
+    -> SELECT COUNT(*)+1 INTO urut FROM produk;
+    -> SELECT CONCAT(23564, urut) INTO v_id_produk;
+    -> SET NEW.id_produk = v_id_produk;
+    -> END;
+    -> //
+Query OK, 0 rows affected (0.006 sec)
+
+MariaDB [minimarket]> DELIMITER ;
+MariaDB [minimarket]> INSERT INTO produk(nama_produk, harga, jenis, stok)
+    -> VALUES('sabun nuvo', '5000', 'peralatan mandi', '100');
+Query OK, 1 row affected (0.007 sec)
+
+MariaDB [minimarket]> SELECT * FROM produk;
++-----------+----------------+-------+-----------------+------+
+| id_produk | nama_produk    | harga | jenis           | stok |
++-----------+----------------+-------+-----------------+------+
+| 235641    | sabun lifebuoy |  5000 | peralatan mandi |  100 |
+| 235642    | sampo clear    | 10000 | peralatan mandi |  100 |
+| 235643    | sabun nuvo     |  5000 | peralatan mandi |  100 |
++-----------+----------------+-------+-----------------+------+
+3 rows in set (0.001 sec)
+
+
+
+MariaDB [(none)]> use minimarket;
+Database changed
+MariaDB [minimarket]> desc produk;
++-------------+-------------+------+-----+---------+-------+
+| Field       | Type        | Null | Key | Default | Extra |
++-------------+-------------+------+-----+---------+-------+
+| id_produk   | char(6)     | NO   | PRI | NULL    |       |
+| nama_produk | varchar(25) | NO   |     | NULL    |       |
+| harga       | int(11)     | NO   |     | NULL    |       |
+| jenis       | varchar(20) | NO   |     | NULL    |       |
+| stok        | int(11)     | NO   |     | NULL    |       |
++-------------+-------------+------+-----+---------+-------+
+5 rows in set (0.091 sec)
+
+MariaDB [minimarket]> DELIMITER //
+MariaDB [minimarket]> CREATE OR REPLACE TRIGGER tambah_produk
+    -> BEFORE INSERT ON produk
+    -> FOR EACH ROW
+    -> BEGIN
+    -> DECLARE urut CHAR(2);
+    -> DECLARE v_id_produk CHAR(10);
+    -> SELECT COUNT(*)+1 INTO urut FROM produk;
+    -> SELECT CONCAT(23564, urut) INTO v_id_produk;
+    -> SET NEW.id_produk = v_id_produk;
+    -> END;
+    -> //
+Query OK, 0 rows affected (0.443 sec)
+
+MariaDB [minimarket]> DELIMITER ;
+MariaDB [minimarket]> INSERT INTO produk(nama_produk, harga, jenis, stok)
+    -> VALUES('sabun dettol', '5000', 'peralatan mandi', '100');
+Query OK, 1 row affected (0.006 sec)
+
+MariaDB [minimarket]> SELECT * FROM produk;
++-----------+----------------+-------+-----------------+------+
+| id_produk | nama_produk    | harga | jenis           | stok |
++-----------+----------------+-------+-----------------+------+
+| 235641    | sabun lifebuoy |  5000 | peralatan mandi |  100 |
+| 235642    | sampo clear    | 10000 | peralatan mandi |  100 |
+| 235643    | sabun nuvo     |  5000 | peralatan mandi |  100 |
+| 235644    | sabun dettol   |  5000 | peralatan mandi |  100 |
++-----------+----------------+-------+-----------------+------+
+4 rows in set (0.001 sec)
+
+MariaDB [minimarket]>
+
+
+
+
+============================== TRIGGER MENAMBAHKAN PRODUK MINIMARKET ==================================
+DELIMITER //
+CREATE OR REPLACE TRIGGER tambah_produk
+BEFORE INSERT ON produk
+FOR EACH ROW
+BEGIN
+DECLARE urut CHAR(2);
+DECLARE tahun INT(2);
+DECLARE uniq CHAR(2);
+DECLARE v_id_produk CHAR(6);
+SELECT YEAR(DATE(NOW())) INTO tahun;
+SELECT MID(MD5(NEW.nama_produk), 2) INTO uniq;
+SELECT COUNT(*)+10001 INTO urut FROM produk;
+SELECT CONCAT(tahun, uniq, urut) INTO v_id_produk;
+SET NEW.id_produk = v_id_produk;
+END;
+//
+
+TAMBAH :
+DELIMITER ;
+INSERT INTO produk(nama_produk, harga, jenis, stok)
+VALUES('test', '5000', 'peralatan mandi', '100');
+
+DELIMITER ;
+INSERT INTO produk(nama_produk, harga, jenis, stok)
+VALUES('sabun lifebuoy', '5000', 'peralatan mandi', '100');
+
+DELIMITER ;
+INSERT INTO produk(nama_produk, harga, jenis, stok)
+VALUES('sampo clear', '10000', 'peralatan mandi', '100');
+
+DELIMITER ;
+INSERT INTO produk(nama_produk, harga, jenis, stok)
+VALUES('sabun nuvo', '5000', 'peralatan mandi', '100');
+
+DELIMITER ;
+INSERT INTO produk(nama_produk, harga, jenis, stok)
+VALUES('Taro', '8000', 'snack', '200');
+
+DELIMITER ;
+INSERT INTO produk(nama_produk, harga, jenis, stok)
+VALUES('cheetatos', '6000', 'snack', '250');
+
+DELIMITER ;
+INSERT INTO produk(nama_produk, harga, jenis, stok)
+VALUES('siip', '5000', 'snack', '150');
+
+DELIMITER ;
+INSERT INTO produk(nama_produk, harga, jenis, stok)
+VALUES('lays', '5000', 'snack', '350');
+
+SELECT * FROM produk WHERE nama_produk = 'pepsodent';
+
+
+
+============================== TUGAS TRIGGER REVISI ==================================
+
